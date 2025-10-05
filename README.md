@@ -64,6 +64,7 @@ The Dune MCP server provides access to Dune API endpoints, returning structured 
 - `log_address` (optional): Filter transactions to return ones where this address is present in the logs of the transaction.
 - `topic0` (optional): Filter transactions to return ones with the provided primary event topic.
 - `min_block_number` (optional): Filter transactions to return ones that are included in this block number and onwards.
+- `limit` (optional): Limit the number of transactions returned
 - `is_sender` (optional): Return transactions where the provided address is the sender.
 - `is_receiver` (optional): Return transactions where the provided address is the receiver.
 

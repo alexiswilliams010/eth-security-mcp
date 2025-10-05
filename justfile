@@ -10,7 +10,7 @@ debug workspace *args: (build workspace)
     set -euxo pipefail
 
     echo 'Setting up MCP debug server for {{workspace}}'
-    x=$(cat .env | tr '\n' ' ' | sed 's/^/-e /')
+    x=$(cat .env | grep -v '^$' | grep -v '^#' | sed 's/^/-e /' | tr '\n' ' ')
     cd src/{{workspace}} && npx -y @modelcontextprotocol/inspector $x dist/index.js {{args}}
 
 setup-linux workspace: (build workspace)
