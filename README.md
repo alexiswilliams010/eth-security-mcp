@@ -50,7 +50,7 @@ This collection includes three specialized MCP servers for Ethereum security ana
 
 | Server | Purpose | Tools |
 |--------|---------|-------|
-| **Dune** | Transaction analysis and blockchain data | `get_transactions_by_address` |
+| **Dune** | Transaction analysis and blockchain data | `get_transactions_by_address`, `get_activity_by_address` |
 | **Sources** | Function signatures and contract source code | `retrieve_function_signature`, `retrieve_source_code` |
 | **Cast** | Transaction simulation and debugging | `run_transaction` |
 
@@ -91,6 +91,62 @@ Returns an array of transaction objects with the following structure:
     data: string;           // Raw event data
     topics: string[];       // Event topics
   }>;
+}[]
+```
+
+### `get_activity_by_address`
+
+**Description:** Retrieve token activity for a specific address using Dune's Sim API.
+
+#### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `address` | string | ✅ | The address to get token activity for |
+| `block_number` | number | ✅ | Return activities up to this block number |
+| `chain_ids` | string | ❌ | Comma-separated list of chain IDs |
+
+#### Returns
+
+Returns an array of activity objects with the following structure:
+
+```typescript
+{
+  chain_id: number;         // Chain ID where activity occurred
+  block_number: number;     // Block containing the activity
+  block_time: string;       // Timestamp of the block
+  tx_hash: string;          // Transaction hash
+  type: string;             // Type of activity (transfer, swap, etc.)
+  asset_type: string;       // Type of asset (erc20, native, etc.)
+  token_address: string;    // Address of the token contract
+  from: string;             // Sender address
+  to: string;               // Receiver address
+  spender: string;          // Spender address (for approvals)
+  value: string;            // Amount transferred
+  value_usd: number;        // USD value of the transfer
+  token_metadata: {         // Token information
+    symbol: string;         // Token symbol
+    decimals: number;       // Token decimals
+    name: string;           // Token name
+    price_usd: number;      // Token price in USD
+    standard: string;       // Token standard (erc20, etc.)
+  };
+  function: {               // Function call details
+    signature: string;      // Function signature
+    name: string;           // Function name
+    inputs: {               // Function inputs
+      name: string;         // Parameter name
+      type: string;         // Parameter type
+      value: string;        // Parameter value
+    };
+  };
+  contract_metadata: {      // Contract information
+    name: string;           // Contract name
+  };
+  from_token_address: string;    // Source token address (for swaps)
+  from_token_value: string;      // Source token amount (for swaps)
+  to_token_address: string;      // Destination token address (for swaps)
+  to_token_value: string;        // Destination token amount (for swaps)
 }[]
 ```
 
