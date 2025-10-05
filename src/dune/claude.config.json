@@ -1,0 +1,11 @@
+{
+    "server-dune": {
+        "command": "npx",
+        "args": [],
+        "env": {
+            "DUNE_API_KEY": "DUNE_API_KEY"
+        },
+        "disabled": false,
+        "autoApprove": []
+    }
+}
