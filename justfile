@@ -5,10 +5,10 @@ build workspace:
     @echo 'Building {{workspace}}'
     cd src/{{workspace}} && npm run prepare
 
-debug workspace: (build workspace)
+debug workspace *args: (build workspace)
     #!/usr/bin/env bash
     set -euxo pipefail
 
     echo 'Setting up MCP debug server for {{workspace}}'
     x=$(cat .env | tr '\n' ' ' | sed 's/^/-e /')
-    cd src/{{workspace}} && npx @modelcontextprotocol/inspector $x build/index.js
+    cd src/{{workspace}} && npx -y @modelcontextprotocol/inspector $x dist/index.js {{args}}
