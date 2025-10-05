@@ -1,0 +1,18 @@
+{
+    "server-cast": {
+        "command": "docker",
+        "args": [
+            "run",
+            "-i",
+            "--rm",
+            "-e",
+            "ALCHEMY_API_KEY",
+            "mcp/cast"
+        ],
+        "env": {
+            "ALCHEMY_API_KEY": "ALCHEMY_API_KEY"
+        },
+        "disabled": false,
+        "autoApprove": []
+    }
+}

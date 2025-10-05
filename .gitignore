@@ -2,3 +2,4 @@
 dist
 node_modules
 claude.config.tmp.json
+claude.docker.config.tmp.json
