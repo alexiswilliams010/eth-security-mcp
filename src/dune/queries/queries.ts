@@ -82,9 +82,6 @@ async function fetchAndPaginate(logger: LoggingFunction, address: string, apiKey
         });
         const nextResponseBody = await parseResponseBody(nextResponse);
 
-        // Log the response body
-        logger({ level: "info", data: nextResponseBody });
-
         const parsedResponse = types.GetTransactionsEchoResponse.parse(nextResponseBody);
         results.push(...parsedResponse.transactions);
         offset = parsedResponse.next_offset;
