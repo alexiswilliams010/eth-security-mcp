@@ -1,10 +1,14 @@
 import * as types from "./types.js";
 
-const baseURL = "https://www.4byte.directory/api/v1/signatures/";
+const baseSignatureUrl = "https://www.4byte.directory/api/v1/signatures/";
+const baseSourceCodeUrl = "https://sourcify.dev/server"
+
+// Type definition for logging function
+type LoggingFunction = (message: { level: string, data: any }) => void;
 
 export async function retrieveFunctionSignature(selector: string) {
     // Construct the URL with the query parameter and fetch the data
-    const url = `${baseURL}?hex_signature=${selector}`;
+    const url = `${baseSignatureUrl}?hex_signature=${selector}`;
     const response = await fetch(url);
     const data = await response.json();
 
@@ -24,4 +28,14 @@ export async function retrieveFunctionSignature(selector: string) {
 
     // TODO: handle pagination later
     return signatures;
+}
+
+export async function retrieveSourceCode(logger: LoggingFunction, address: string, chainId: string) {
+    const url = `${baseSourceCodeUrl}/v2/contract/${chainId}/${address}?fields=sources`;
+
+    // Fetch the data and parse for the source code
+    const response = await fetch(url);
+    const data = await response.json();
+    const parsedData = types.SourceCodeResultSchema.parse(data);
+    return parsedData;
 }

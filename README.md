@@ -85,9 +85,9 @@ Returns an array of transaction objects, where each transaction contains a list 
   - `topics`: Array of event topics
 - `decoded`: Decoded transaction data (if available)
 
-## 4byte
+## Sources
 
-The 4byte MCP server provides access to the 4byte API, which contains Ethereum function signatures.
+The Sources MCP server provides access to both function signature data and contract source code.
 
 ### Available Tools
 
@@ -104,6 +104,20 @@ The 4byte MCP server provides access to the 4byte API, which contains Ethereum f
 Returns an object containing:
 - `best_match`: The most likely matching function signature (determined by lowest ID).
 - `all_matches`: Array of all potential matching function signatures found.
+
+#### retrieve_source_code
+
+**Overview:** Retrieve source code for a given contract address from Sourcify.
+
+**Parameters**
+
+- `address` (required): The address of the contract to retrieve the source code for.
+- `chain_id` (required): The chain ID where the contract is deployed.
+
+**Returns**
+
+Returns an object containing:
+- `sources`: A record of source files where each key is the file path and the value contains the file content.
 
 ## Cast
 

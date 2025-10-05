@@ -1,12 +1,12 @@
 {
-  "name": "server-4byte",
+  "name": "server-sources",
   "version": "0.0.1",
-  "description": "MCP Server for interacting with 4byte",
+  "description": "MCP Server for interacting with sources",
   "author": "alexiswilliams010",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "server-4byte": "dist/index.js"
+    "server-sources": "dist/index.js"
   },
   "scripts": {
     "build": "tsc && shx chmod +x dist/*.js",

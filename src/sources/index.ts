@@ -7,12 +7,12 @@ import {
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
-import * as signatures from "./signatures/signatures.js";
-import * as types from "./signatures/types.js";
+import * as sources from "./sources.js";
+import * as types from "./types.js";
 
 const server = new Server(
     {
-        name: "server-4byte",
+        name: "server-sources",
         version: "0.0.1",
     },
     {
@@ -23,6 +23,13 @@ const server = new Server(
     }
 );
 
+const logger = (message: { level: string, data: any }) => {
+    server.sendLoggingMessage({
+        level: message.level as "error" | "info" | "debug" | "notice" | "warning" | "critical" | "alert" | "emergency",
+        data: message.data,
+    });
+}
+
 server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
         tools: [
@@ -31,6 +38,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 description: "Retrieve function signature(s) for a given selector from 4byte",
                 inputSchema: zodToJsonSchema(types.RetrieveFunctionSignatureSchema),
             },
+            {
+                name: "retrieve_source_code",
+                description: "Retrieve source code for a given contract address",
+                inputSchema: zodToJsonSchema(types.RetrieveSourceCodeSchema),
+            }
         ],
     };
 });
@@ -46,10 +58,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             case "retrieve_function_signature": {
                 // Parse arguments and call the 4byte API
                 const args = types.RetrieveFunctionSignatureSchema.parse(request.params.arguments);
-                const functionSignatures = await signatures.retrieveFunctionSignature(args.selector);
+                const functionSignatures = await sources.retrieveFunctionSignature(args.selector);
 
                 return {
                     content: [{ type: "text", text: JSON.stringify(functionSignatures, null, 2) }],
+                };
+            }
+            case "retrieve_source_code": {
+                // Parse arguments and call the Sourcify API
+                const args = types.RetrieveSourceCodeSchema.parse(request.params.arguments);
+                const sourceCode = await sources.retrieveSourceCode(logger, args.address, args.chain_id);
+                return {
+                    content: [{ type: "text", text: JSON.stringify(sourceCode, null, 2) }],
                 };
             }
             default: {
@@ -67,7 +87,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function runServer() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error("4byte MCP Server running on stdio");
+    console.error("Sources MCP Server running on stdio");
 }
 
 runServer().catch((error) => {
