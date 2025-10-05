@@ -46,99 +46,122 @@ To install MCP servers from this repo into Claude Desktop:
 
 # MCP Servers
 
-## Dune
+This collection includes three specialized MCP servers for Ethereum security analysis:
 
-The Dune MCP server provides access to Dune API endpoints, returning structured results about transactions.
+| Server | Purpose | Tools |
+|--------|---------|-------|
+| **Dune** | Transaction analysis and blockchain data | `get_transactions_by_address` |
+| **Sources** | Function signatures and contract source code | `retrieve_function_signature`, `retrieve_source_code` |
+| **Cast** | Transaction simulation and debugging | `run_transaction` |
 
-### Available Tools
+## 🔍 Dune
 
-#### get_transactions_by_address
+**Purpose:** Access Dune API endpoints for structured transaction analysis and blockchain data retrieval.
 
-**Overview:** Use Dune's Echo API to retrieve transactions for a provided address.
+### Tools
 
-**Parameters**
+### `get_transactions_by_address`
 
-- `address` (required): The address to get transactions for.
-- `chain_ids` (optional): Comma separated list of chain ids to get transactions for.
-- `method_id` (optional): Filter transactions to return ones with the proivded method id (function selector).
-- `log_address` (optional): Filter transactions to return ones where this address is present in the logs of the transaction.
-- `topic0` (optional): Filter transactions to return ones with the provided primary event topic.
-- `min_block_number` (optional): Filter transactions to return ones that are included in this block number and onwards.
-- `limit` (optional): Limit the number of transactions returned
-- `is_sender` (optional): Return transactions where the provided address is the sender.
-- `is_receiver` (optional): Return transactions where the provided address is the receiver.
+**Description:** Retrieve transactions for a specific address using Dune's Sim API.
 
-**Returns**
+#### Parameters
 
-Returns an array of transaction objects, where each transaction contains a list of pertinent information including:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `address` | string | ✅ | The address to get transactions for |
+| `block_number` | number | ❌ | Filter transactions from this block number onwards |
+| `chain_ids` | string | ❌ | Comma-separated list of chain IDs |
+| `is_sender` | boolean | ❌ | Return transactions where address is the sender |
+| `is_receiver` | boolean | ❌ | Return transactions where address is the receiver |
 
-- `address`: The address of the contract or account involved
-- `block_number`: Number of the block containing the transaction
-- `data`: Raw transaction data
-- `from`: Address of the transaction sender
-- `gas_used`: Amount of gas used
-- `to`: Address of the transaction recipient (null for contract creation)
-- `value`: Amount of ETH transferred in wei
-- `logs`: Array of event logs emitted during transaction execution
-  - `address`: Address of the contract emitting the event
-  - `data`: Raw event data
-  - `topics`: Array of event topics
-- `decoded`: Decoded transaction data (if available)
+#### Returns
 
-## Sources
+Returns an array of transaction objects with the following structure:
 
-The Sources MCP server provides access to both function signature data and contract source code.
+```typescript
+{
+  address: string;          // Contract or account address
+  block_number: number;     // Block containing the transaction
+  data: string;             // Raw transaction data
+  from: string;             // Transaction sender address
+  to: string | null;        // Transaction recipient (null for contract creation)
+  value: string;            // ETH amount transferred in wei
+  logs: Array<{             // Event logs emitted during execution
+    address: string;        // Contract emitting the event
+    data: string;           // Raw event data
+    topics: string[];       // Event topics
+  }>;
+}[]
+```
 
-### Available Tools
+## 📚 Sources
 
-#### retrieve_function_signature
+**Purpose:** Access function signature data and contract source code for security analysis.
 
-**Overview:** Retrieve function signature(s) for a given function selector from the 4byte API.
+### Tools
 
-**Parameters**
+### `retrieve_function_signature`
 
-- `selector` (required): The hexadecimal function selector to retrieve the function signature(s) for.
+**Description:** Retrieve function signature(s) for a given function selector from the 4byte API.
 
-**Returns**
+#### Parameters
 
-Returns an object containing:
-- `best_match`: The most likely matching function signature (determined by lowest ID).
-- `all_matches`: Array of all potential matching function signatures found.
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `selector` | string | ✅ | Hexadecimal function selector (e.g., "0x70a08231") |
 
-#### retrieve_source_code
+#### Returns
 
-**Overview:** Retrieve source code for a given contract address from Sourcify.
+```typescript
+{
+  best_match: string;      // Most likely function signature (lowest ID)
+  all_matches: string[];   // All potential matching signatures
+}
+```
 
-**Parameters**
+### `retrieve_source_code`
 
-- `address` (required): The address of the contract to retrieve the source code for.
-- `chain_id` (required): The chain ID where the contract is deployed.
+**Description:** Retrieve source code for a contract address from Sourcify.
 
-**Returns**
+#### Parameters
 
-Returns an object containing:
-- `sources`: A record of source files where each key is the file path and the value contains the file content.
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `address` | string | ✅ | Contract address to retrieve source for |
+| `chain_id` | number | ✅ | Chain ID where contract is deployed |
 
-## Cast
+#### Returns
 
-The Cast MCP server provides access to Foundry's cast command-line tool, allowing for interaction with Ethereum nodes and smart contracts.
+```typescript
+{
+  sources: Record<string, {      // Source files
+    [filePath: string]: string;  // File path → file content
+  }>;
+}
+```
 
-### Available Tools
+## ⚡ Cast
 
-#### run_transaction
+**Purpose:** Access Foundry's cast command-line tool for transaction simulation and smart contract interaction.
 
-**Overview:** Simulate a transaction using Foundry's cast run command.
+### Tools
 
-**Parameters**
+### `run_transaction`
 
-- `transactionHash` (required): The hash of the transaction to simulate.
-- `rpcUrl` (required): The RPC URL of the Ethereum node to use for simulation.
-- `quick` (optional): Whether to use quick mode for faster simulation (default: false).
+**Description:** Simulate a transaction using Foundry's cast run command for debugging and analysis.
 
-**Returns**
+#### Parameters
 
-Returns the simulation result as a string, including:
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `transactionHash` | string | ✅ | Hash of the transaction to simulate |
+| `rpcUrl` | string | ✅ | RPC URL of the Ethereum node |
+| `quick` | boolean | ❌ | Use quick mode for faster simulation (default: false) |
+
+#### Returns
+
+Returns a string containing:
 - Transaction execution details
 - State changes
-- Gas usage
-- Revert reasons (if any)
+- Gas usage information
+- Revert reasons (if transaction fails)
