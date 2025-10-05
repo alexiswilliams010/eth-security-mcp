@@ -1,0 +1,11 @@
+{
+    "server-cast": {
+        "command": "npx",
+        "args": [],
+        "env": {
+            "ALCHEMY_API_KEY": "ALCHEMY_API_KEY"
+        },
+        "disabled": false,
+        "autoApprove": []
+    }
+}

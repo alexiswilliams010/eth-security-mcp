@@ -9,7 +9,7 @@ const execAsync = promisify(exec);
 export async function runTransaction(logger: LoggingFunction, transactionHash: string, rpcUrl: string, quick: boolean): Promise<string> {
     // Use subprocess to perform the cast run command
     const quickFlag = quick ? "--quick" : "";
-    const command = `cast run ${transactionHash} --rpc-url ${rpcUrl} ${quickFlag}`;
+    const command = `~/.foundry/bin/cast run ${transactionHash} --rpc-url ${rpcUrl} ${quickFlag}`;
     logger({ level: "info", data: { message: `Running command: ${command}` } });
 
     const { stdout } = await execAsync(command);

@@ -68,6 +68,23 @@ The Dune MCP server provides access to Dune API endpoints, returning structured 
 - `is_sender` (optional): Return transactions where the provided address is the sender.
 - `is_receiver` (optional): Return transactions where the provided address is the receiver.
 
+**Returns**
+
+Returns an array of transaction objects, where each transaction contains a list of pertinent information including:
+
+- `address`: The address of the contract or account involved
+- `block_number`: Number of the block containing the transaction
+- `data`: Raw transaction data
+- `from`: Address of the transaction sender
+- `gas_used`: Amount of gas used
+- `to`: Address of the transaction recipient (null for contract creation)
+- `value`: Amount of ETH transferred in wei
+- `logs`: Array of event logs emitted during transaction execution
+  - `address`: Address of the contract emitting the event
+  - `data`: Raw event data
+  - `topics`: Array of event topics
+- `decoded`: Decoded transaction data (if available)
+
 ## 4byte
 
 The 4byte MCP server provides access to the 4byte API, which contains Ethereum function signatures.
@@ -87,3 +104,27 @@ The 4byte MCP server provides access to the 4byte API, which contains Ethereum f
 Returns an object containing:
 - `best_match`: The most likely matching function signature (determined by lowest ID).
 - `all_matches`: Array of all potential matching function signatures found.
+
+## Cast
+
+The Cast MCP server provides access to Foundry's cast command-line tool, allowing for interaction with Ethereum nodes and smart contracts.
+
+### Available Tools
+
+#### run_transaction
+
+**Overview:** Simulate a transaction using Foundry's cast run command.
+
+**Parameters**
+
+- `transactionHash` (required): The hash of the transaction to simulate.
+- `rpcUrl` (required): The RPC URL of the Ethereum node to use for simulation.
+- `quick` (optional): Whether to use quick mode for faster simulation (default: false).
+
+**Returns**
+
+Returns the simulation result as a string, including:
+- Transaction execution details
+- State changes
+- Gas usage
+- Revert reasons (if any)
