@@ -1,0 +1,30 @@
+{
+  "name": "server-dune",
+  "version": "0.0.1",
+  "description": "MCP Server for interacting with Dune SQL API and Echo",
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "server-dune": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc && shx chmod +x dist/*.js",
+    "prepare": "npm run build",
+    "watch": "tsc --watch"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "shx": "^0.4.0",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.2",
+    "zod-to-json-schema": "^3.24.5"
+  }
+}
