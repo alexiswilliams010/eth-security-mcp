@@ -1,0 +1,17 @@
+{
+  "name": "eth-security-mcp",
+  "version": "0.0.1",
+  "description": "MCP Server integrations for ETH security workstreams",
+  "type": "module",
+  "workspaces": [
+    "src/*"
+  ],
+  "files": [],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "watch": "npm run watch --workspaces",
+    "link-all": "npm link --workspaces"
+  },
+  "author": "",
+  "license": "MIT"
+}
