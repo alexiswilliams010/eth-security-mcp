@@ -1,7 +1,7 @@
 {
   "name": "server-dune",
   "version": "0.0.1",
-  "description": "MCP Server for interacting with Dune SQL API and Echo",
+  "description": "MCP Server for interacting with Dune Sim API",
   "author": "alexiswilliams010",
   "license": "MIT",
   "type": "module",
