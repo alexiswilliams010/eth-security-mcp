@@ -7,6 +7,7 @@ export const GetTransactionsByAddressEchoSchema = z.object({
     log_address: z.string().optional().default("").describe("Return only transactions with this address in the logs"),
     topic0: z.string().optional().default("").describe("Return only transactions with this event topic0 in the logs"),
     min_block_number: z.string().optional().default("").describe("Return only transactions from this block number onwards"),
+    limit: z.string().optional().default("").describe("Limit the number of transactions returned"),
     is_sender: z.boolean().optional().default(false).describe("Return transactions where the provided address is the sender"),
     is_receiver: z.boolean().optional().default(false).describe("Return transactions where the provided address is the receiver"),
 });

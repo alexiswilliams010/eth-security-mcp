@@ -6,6 +6,13 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 // Type definition for logging function
 type LoggingFunction = (message: { level: string, data: any }) => void;
 
+type FilterParams = {
+    is_sender: boolean,
+    is_receiver: boolean,
+    address: string,
+    limit: number,
+}
+
 // API Handlers
 const echoTxBaseURL = "https://api.dune.com/api/echo/v1/transactions/evm/";
 
@@ -18,6 +25,7 @@ export async function getTransactionsByAddress(
     log_address: string,
     topic0: string,
     min_block_number: string,
+    limit: string,
     is_sender: boolean,
     is_receiver: boolean
 ) {
@@ -26,11 +34,18 @@ export async function getTransactionsByAddress(
         method_id,
         log_address,
         topic0,
-        min_block_number
+        min_block_number,
+        limit
     });
-    const results = await fetchAndPaginate(logger, address, apiKey, params);
 
-    return filterTransactionResults(results, is_sender, is_receiver, address);
+    const filterParams: FilterParams = {
+        is_sender,
+        is_receiver,
+        address,
+        limit: parseInt(limit)
+    }
+    const results = await fetchAndPaginate(logger, address, apiKey, params, filterParams);
+    return results
 }
 
 // Helper functions
@@ -54,21 +69,33 @@ async function parseResponseBody(response: Response): Promise<unknown> {
     return response.text();
 }
 
-function filterTransactionResults(results: any[], is_sender: boolean, is_receiver: boolean, address: string): any[] {
-    return results.filter((result) => {
+function filterTransactionResults(
+    results: any[],
+    is_sender: boolean,
+    is_receiver: boolean,
+    address: string,
+    remainingSlots: number
+): any[] {
+    // Filter based on sender/receiver criteria
+    const filteredResults = results.filter((result) => {
         if (is_sender && is_receiver) {
             return true;
         }
 
         return is_sender ? result.from.toLowerCase() === address.toLowerCase() : result.to.toLowerCase() === address.toLowerCase();
     });
+
+    // Limit the results to not exceed the provided remaining number of transactions that can be returned
+    return filteredResults.slice(0, remainingSlots);
 }
 
-async function fetchAndPaginate(logger: LoggingFunction, address: string, apiKey: string, params: any): Promise<any[]> {
+async function fetchAndPaginate(logger: LoggingFunction, address: string, apiKey: string, params: any, filterParams: FilterParams): Promise<any[]> {
     const results = [];
+    const maxLimit = filterParams.limit;
     let offset = "initial_offset";
+    let currentLimit = 0;
 
-    while (offset !== "" && offset !== undefined) {
+    while ((offset !== "" && offset !== undefined) && currentLimit < maxLimit) {
         await sleep(200); // intentionally slow down to avoid rate limiting
 
         const queryParams = constructQueryParameters({
@@ -84,7 +111,17 @@ async function fetchAndPaginate(logger: LoggingFunction, address: string, apiKey
         const nextResponseBody = await parseResponseBody(nextResponse);
 
         const parsedResponse = types.GetTransactionsEchoResponse.parse(nextResponseBody);
-        results.push(...parsedResponse.transactions);
+
+        // Filter the results based on the filterParams
+        const filteredResults = filterTransactionResults(
+            parsedResponse.transactions,
+            filterParams.is_sender,
+            filterParams.is_receiver,
+            filterParams.address,
+            maxLimit - currentLimit,
+        );
+        results.push(...filteredResults);
+        currentLimit += filteredResults.length;
         offset = parsedResponse.next_offset;
     }
 
