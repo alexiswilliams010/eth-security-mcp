@@ -40,7 +40,9 @@ setup-linux workspace:
     echo "$result" > "$workdir/claude.config.tmp.json"
 
 setup-macos workspace:
-    @echo 'Installing {{workspace}} MCP server into Claude Desktop for MacOS'
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    echo 'Installing {{workspace}} MCP server into Claude Desktop for MacOS'
 
     # Create claude_desktop_config.json if it doesn't exist
     if [ ! -f ~/Library/Application\ Support/Claude/claude_desktop_config.json ]; then
