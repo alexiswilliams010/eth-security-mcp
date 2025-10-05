@@ -21,7 +21,7 @@ export const GetTransactionsEchoRequest = z.object({
     chain_ids: z.string().optional().default(""),
     to: z.string().optional().default(""),
     method_id: z.string().optional().default(""),
-    decode: z.string().optional().default(""),
+    decode: z.boolean().optional().default(true),
     log_address: z.string().optional().default(""),
     topic0: z.string().optional().default(""),
     min_block_number: z.string().optional().default(""),
@@ -48,14 +48,15 @@ export const TransactionEchoSchema = z.object({
     hash: z.string(),
     index: z.number(),
     nonce: z.string(),
-    to: z.string(),
+    to: z.string().nullable().default(""), // to can be null if the transaction is a contract creation
     transaction_type: z.string(),
-    value: z.string(),
+    value: z.string().optional().nullable().default(""),
     logs: z.array(TransactionEchoLogsSchema),
+    decoded: z.any().optional().nullable().default({}),
 });
 
 // All response fields for /echo/v1/transactions/evm/{address}
 export const GetTransactionsEchoResponse = z.object({
     next_offset: z.string().optional().default(""),
-    transactions: z.array(TransactionEchoSchema),
+    transactions: z.array(TransactionEchoSchema).optional().default([]),
 });

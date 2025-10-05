@@ -18,9 +18,17 @@ const server = new Server(
     {
         capabilities: {
             tools: {},
+            logging: {},
         },
-    }
+    },
 );
+
+const logger = (message: { level: string, data: any }) => {
+    server.sendLoggingMessage({
+        level: message.level as "error" | "info" | "debug" | "notice" | "warning" | "critical" | "alert" | "emergency",
+        data: message.data,
+    });
+}
 
 server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
@@ -51,6 +59,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
                 // Get transactions from Dune Echo API
                 const transactions = await queries.getTransactionsByAddress(
+                    logger,
                     args.address,
                     key,
                     args.chain_ids,

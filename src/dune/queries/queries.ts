@@ -3,10 +3,14 @@ import * as types from "./types.js";
 // To avoid rate limiting, we sleep for 200ms between requests
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Type definition for logging function
+type LoggingFunction = (message: { level: string, data: any }) => void;
+
 // API Handlers
 const echoTxBaseURL = "https://api.dune.com/api/echo/v1/transactions/evm/";
 
 export async function getTransactionsByAddress(
+    logger: LoggingFunction,
     address: string,
     apiKey: string,
     chain_ids: string,
@@ -24,7 +28,7 @@ export async function getTransactionsByAddress(
         topic0,
         min_block_number
     });
-    const results = await fetchAndPaginate(address, apiKey, params);
+    const results = await fetchAndPaginate(logger, address, apiKey, params);
 
     // Filter results based on is_sender and is_receiver
     const filteredResults = results.filter((result) => {
@@ -59,7 +63,7 @@ async function parseResponseBody(response: Response): Promise<unknown> {
     return response.text();
 }
 
-async function fetchAndPaginate(address: string, apiKey: string, params: any): Promise<any[]> {
+async function fetchAndPaginate(logger: LoggingFunction, address: string, apiKey: string, params: any): Promise<any[]> {
     const results = [];
     let offset = "initial_offset";
 
@@ -77,6 +81,10 @@ async function fetchAndPaginate(address: string, apiKey: string, params: any): P
             }
         });
         const nextResponseBody = await parseResponseBody(nextResponse);
+
+        // Log the response body
+        logger({ level: "info", data: nextResponseBody });
+
         const parsedResponse = types.GetTransactionsEchoResponse.parse(nextResponseBody);
         results.push(...parsedResponse.transactions);
         offset = parsedResponse.next_offset;
