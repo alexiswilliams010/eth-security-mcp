@@ -57,7 +57,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                     args.method_id,
                     args.log_address,
                     args.topic0,
-                    args.min_block_number
+                    args.min_block_number,
+                    args.is_sender,
+                    args.is_receiver
                 );
 
                 return {

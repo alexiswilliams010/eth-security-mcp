@@ -14,6 +14,8 @@ export async function getTransactionsByAddress(
     log_address: string,
     topic0: string,
     min_block_number: string,
+    is_sender: boolean,
+    is_receiver: boolean
 ) {
     const params = types.GetTransactionsEchoRequest.parse({
         chain_ids,
@@ -23,7 +25,17 @@ export async function getTransactionsByAddress(
         min_block_number
     });
     const results = await fetchAndPaginate(address, apiKey, params);
-    return results;
+
+    // Filter results based on is_sender and is_receiver
+    const filteredResults = results.filter((result) => {
+        if (is_sender && is_receiver) {
+            return true;
+        }
+
+        return is_sender ? result.from.toLowerCase() === address.toLowerCase() : result.to.toLowerCase() === address.toLowerCase();
+    });
+
+    return filteredResults;
 }
 
 // Helper functions
@@ -66,7 +78,7 @@ async function fetchAndPaginate(address: string, apiKey: string, params: any): P
         });
         const nextResponseBody = await parseResponseBody(nextResponse);
         const parsedResponse = types.GetTransactionsEchoResponse.parse(nextResponseBody);
-        results.push(parsedResponse.transactions);
+        results.push(...parsedResponse.transactions);
         offset = parsedResponse.next_offset;
     }
 
