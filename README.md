@@ -4,8 +4,18 @@ A collection of MCP servers for security analysts, auditors, and incident respon
 
 ### Workspaces
 
-This repository uses npm workspaces to separate each action, to interact with a specific workspace use `npm <action> -w src/<directory-name>`
+This repository uses npm workspaces to separate each action. To interact with a specific workspace use `npm <action> -w src/<directory-name>`.
 
-### Local Debuggings
+### Build and Debug
 
-The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) can be used to locally run the servers for debugging purposes. Just make sure to build the servers locally using `npm run prepare`
+This repo uses a [justfile](https://github.com/casey/just) to automate building and debugging using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector). For example, to build and debug the `dune` MCP server, you can run the following:
+
+```bash
+$ just -l
+Available recipes:
+    build workspace
+    debug workspace
+
+$ just debug dune # name of the workspace is dune
+```
+
