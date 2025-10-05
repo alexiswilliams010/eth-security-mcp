@@ -12,6 +12,6 @@
     "watch": "npm run watch --workspaces",
     "link-all": "npm link --workspaces"
   },
-  "author": "",
+  "author": "alexiswilliams010",
   "license": "MIT"
 }
