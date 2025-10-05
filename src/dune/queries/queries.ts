@@ -30,16 +30,7 @@ export async function getTransactionsByAddress(
     });
     const results = await fetchAndPaginate(logger, address, apiKey, params);
 
-    // Filter results based on is_sender and is_receiver
-    const filteredResults = results.filter((result) => {
-        if (is_sender && is_receiver) {
-            return true;
-        }
-
-        return is_sender ? result.from.toLowerCase() === address.toLowerCase() : result.to.toLowerCase() === address.toLowerCase();
-    });
-
-    return filteredResults;
+    return filterTransactionResults(results, is_sender, is_receiver, address);
 }
 
 // Helper functions
@@ -61,6 +52,16 @@ async function parseResponseBody(response: Response): Promise<unknown> {
         return response.json();
     }
     return response.text();
+}
+
+function filterTransactionResults(results: any[], is_sender: boolean, is_receiver: boolean, address: string): any[] {
+    return results.filter((result) => {
+        if (is_sender && is_receiver) {
+            return true;
+        }
+
+        return is_sender ? result.from.toLowerCase() === address.toLowerCase() : result.to.toLowerCase() === address.toLowerCase();
+    });
 }
 
 async function fetchAndPaginate(logger: LoggingFunction, address: string, apiKey: string, params: any): Promise<any[]> {
