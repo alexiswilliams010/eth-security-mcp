@@ -8,12 +8,12 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { zodToJsonSchema } from "zod-to-json-schema";
 import * as dotenv from "dotenv";
 
-import * as queries from "./queries/queries.js";
-import * as types from "./queries/types.js";
+import * as transactions from "./sim/transactions.js";
+import * as types from "./sim/types.js";
 const server = new Server(
     {
         name: "server-dune",
-        version: "0.0.1",
+        version: "0.0.2",
     },
     {
         capabilities: {
@@ -35,8 +35,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         tools: [
             {
                 name: "get_transactions_by_address",
-                description: "Retrieve all transactions from the provided address using the Echo API",
-                inputSchema: zodToJsonSchema(types.GetTransactionsByAddressEchoSchema),
+                description: "Retrieve all transactions from the provided address using the Sim API",
+                inputSchema: zodToJsonSchema(types.GetTransactionsByAddressSimSchema),
             },
         ],
     }
@@ -55,25 +55,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             case "get_transactions_by_address": {
                 // Retrieve API key and parse arguments
                 const key: string = checkApiKey(apiKey);
-                const args = types.GetTransactionsByAddressEchoSchema.parse(request.params.arguments);
+                const args = types.GetTransactionsByAddressSimSchema.parse(request.params.arguments);
 
-                // Get transactions from Dune Echo API
-                const transactions = await queries.getTransactionsByAddress(
+                // Get transactions from Dune Sim API
+                const txs = await transactions.getTransactionsByAddress(
                     logger,
                     args.address,
                     key,
                     args.chain_ids,
-                    args.method_id,
-                    args.log_address,
-                    args.topic0,
-                    args.min_block_number,
-                    args.limit,
+                    args.block_number,
                     args.is_sender,
                     args.is_receiver
                 );
 
                 return {
-                    content: [{ type: "text", text: JSON.stringify(transactions, null, 2) }],
+                    content: [{ type: "text", text: JSON.stringify(txs, null, 2) }],
                 };
             }
             default: {
