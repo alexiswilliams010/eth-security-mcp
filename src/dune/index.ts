@@ -9,11 +9,12 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import * as dotenv from "dotenv";
 
 import * as transactions from "./sim/transactions.js";
+import * as activity from "./sim/activity.js";
 import * as types from "./sim/types.js";
 const server = new Server(
     {
         name: "server-dune",
-        version: "0.0.2",
+        version: "0.0.3",
     },
     {
         capabilities: {
@@ -37,6 +38,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                 name: "get_transactions_by_address",
                 description: "Retrieve all transactions from the provided address using the Sim API",
                 inputSchema: zodToJsonSchema(types.GetTransactionsByAddressSimSchema),
+            },
+            {
+                name: "get_activity_by_address",
+                description: "Retrieve all token activity from the provided address using the Sim API",
+                inputSchema: zodToJsonSchema(types.GetActivityByAddressSimSchema),
             },
         ],
     }
@@ -70,6 +76,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
                 return {
                     content: [{ type: "text", text: JSON.stringify(txs, null, 2) }],
+                };
+            }
+            case "get_activity_by_address": {
+                // Retrieve API key and parse arguments
+                const key: string = checkApiKey(apiKey);
+                const args = types.GetActivityByAddressSimSchema.parse(request.params.arguments);
+
+                // Get token activity from Dune Sim API
+                const tokenActivity = await activity.getActivityByAddress(
+                  logger,
+                  args.address,
+                  key,
+                  args.chain_ids,
+                  args.block_number
+                );
+
+                return {
+                    content: [{ type: "text", text: JSON.stringify(tokenActivity, null, 2) }],
                 };
             }
             default: {

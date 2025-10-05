@@ -7,48 +7,35 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 // Type definition for logging function
 type LoggingFunction = (message: { level: string, data: any }) => void;
 
-const simTxBaseURL = "https://api.sim.dune.com/v1/evm/transactions/";
+const simActivityBaseURL = "https://api.sim.dune.com/v1/evm/activity/";
 
 type FilterParams = {
-  is_sender: boolean,
-  is_receiver: boolean,
-  address: string,
   block_number: number,
-}
+};
 
-export async function getTransactionsByAddress(
-    logger: LoggingFunction,
-    address: string,
-    apiKey: string,
-    chain_ids: string,
-    block_number: number,
-    is_sender: boolean,
-    is_receiver: boolean
+export async function getActivityByAddress(
+  logger: LoggingFunction,
+  address: string,
+  apiKey: string,
+  chain_ids: string,
+  block_number: number,
 ) {
   // Make sure types match zod schema
-  types.GetTransactionsByAddressSimSchema.parse({
-      address,
-      chain_ids,
-      block_number,
-      is_sender,
-      is_receiver
+  types.GetActivityByAddressSimSchema.parse({
+    address,
+    chain_ids,
+    block_number,
   });
 
   const filterParams: FilterParams = {
-    is_sender,
-    is_receiver,
-    address,
     block_number,
   }
   const results = await fetchAndPaginate(logger, address, apiKey, {chain_ids}, filterParams);
   return results
 }
 
-function filterTransactionResults(
+function filterActivityResults(
   results: any[],
-  is_sender: boolean,
-  is_receiver: boolean,
-  address: string,
   blockLimit: number,
 ): { reachedLimit: boolean, results: any[] } {
   // Filter based on sender/receiver criteria and block number
@@ -60,11 +47,22 @@ function filterTransactionResults(
       return false;
     }
 
-    if (is_sender && is_receiver) {
-      return true;
+    // Filter out call activities that do not result in token movements
+    if (result.type == "call" && result.asset_type == "" && result.token_address == "") {
+      return false;
     }
 
-    return is_sender ? result.from.toLowerCase() === address.toLowerCase() : result.to.toLowerCase() === address.toLowerCase();
+    // Filter out erc1155 and erc721 activities
+    if (result.asset_type == "erc1155" || result.asset_type == "erc721") {
+      return false;
+    }
+
+    // Filter out approve activities since these are not themselves token "movements"
+    if (result.type == "approve") {
+      return false;
+    }
+
+    return true;
   });
 
   return { reachedLimit, results: filteredResults };
@@ -80,9 +78,10 @@ async function fetchAndPaginate(logger: LoggingFunction, address: string, apiKey
 
     const queryParams = constructQueryParameters({
       ...params,
+      limit: 100, // hardcode the response to return max 100 results at a time
       offset: offset === "initial_offset" ? "" : offset
     });
-    const nextResponse = await fetch(`${simTxBaseURL}${address}?${queryParams}`, {
+    const nextResponse = await fetch(`${simActivityBaseURL}${address}?${queryParams}`, {
       method: "GET",
       headers: {
           "X-Sim-Api-Key": apiKey,
@@ -90,14 +89,11 @@ async function fetchAndPaginate(logger: LoggingFunction, address: string, apiKey
     });
     const nextResponseBody = await parseResponseBody(nextResponse);
 
-    const parsedResponse = types.GetTransactionsByAddressSimResponse.parse(nextResponseBody);
+    const parsedResponse = types.ActivitiesSimResponseSchema.parse(nextResponseBody);
 
     // Filter the results based on the filterParams
-    const { reachedLimit, results: filteredResults } = filterTransactionResults(
-      parsedResponse.transactions,
-      filterParams.is_sender,
-      filterParams.is_receiver,
-      filterParams.address,
+    const { reachedLimit, results: filteredResults } = filterActivityResults(
+      parsedResponse.activity,
       blockLimit,
     );
     results.push(...filteredResults);
