@@ -66,3 +66,23 @@ The Dune MCP server provides access to Dune API endpoints, returning structured 
 - `min_block_number` (optional): Filter transactions to return ones that are included in this block number and onwards.
 - `is_sender` (optional): Return transactions where the provided address is the sender.
 - `is_receiver` (optional): Return transactions where the provided address is the receiver.
+
+## 4byte
+
+The 4byte MCP server provides access to the 4byte API, which contains Ethereum function signatures.
+
+### Available Tools
+
+#### retrieve_function_signature
+
+**Overview:** Retrieve function signature(s) for a given function selector from the 4byte API.
+
+**Parameters**
+
+- `selector` (required): The hexadecimal function selector to retrieve the function signature(s) for.
+
+**Returns**
+
+Returns an object containing:
+- `best_match`: The most likely matching function signature (determined by lowest ID).
+- `all_matches`: Array of all potential matching function signatures found.

@@ -1,0 +1,9 @@
+{
+    "server-4byte": {
+        "command": "npx",
+        "args": [],
+        "env": {},
+        "disabled": false,
+        "autoApprove": []
+    }
+}
