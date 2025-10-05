@@ -1,6 +1,7 @@
-import { z } from "zod";
-
 import * as types from "./types.js";
+
+// To avoid rate limiting, we sleep for 200ms between requests
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // API Handlers
 const echoTxBaseURL = "https://api.dune.com/api/echo/v1/transactions/evm/";
@@ -21,17 +22,8 @@ export async function getTransactionsByAddress(
         topic0,
         min_block_number
     });
-    const queryParams = constructQueryParameters(params);
-    const response = await fetch(`${echoTxBaseURL}${address}?${queryParams}`, {
-        method: "GET",
-        headers: {
-            "X-Dune-API-Key": apiKey,
-        }
-    });
-
-    const responseBody = await parseResponseBody(response);
-    const parsedResponse = types.GetTransactionsEchoResponse.parse(responseBody);
-    return parsedResponse;
+    const results = await fetchAndPaginate(address, apiKey, params);
+    return results;
 }
 
 // Helper functions
@@ -53,4 +45,30 @@ async function parseResponseBody(response: Response): Promise<unknown> {
         return response.json();
     }
     return response.text();
+}
+
+async function fetchAndPaginate(address: string, apiKey: string, params: any): Promise<any[]> {
+    const results = [];
+    let offset = "initial_offset";
+
+    while (offset !== "" && offset !== undefined) {
+        await sleep(200); // intentionally slow down to avoid rate limiting
+
+        const queryParams = constructQueryParameters({
+            ...params,
+            offset: offset === "initial_offset" ? "" : offset
+        });
+        const nextResponse = await fetch(`${echoTxBaseURL}${address}?${queryParams}`, {
+            method: "GET",
+            headers: {
+                "X-Dune-API-Key": apiKey,
+            }
+        });
+        const nextResponseBody = await parseResponseBody(nextResponse);
+        const parsedResponse = types.GetTransactionsEchoResponse.parse(nextResponseBody);
+        results.push(parsedResponse.transactions);
+        offset = parsedResponse.next_offset;
+    }
+
+    return results;
 }

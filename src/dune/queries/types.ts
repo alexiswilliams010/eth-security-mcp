@@ -13,6 +13,7 @@ export const GetTransactionsByAddressEchoSchema = z.object({
 // For more information, see https://docs.dune.com/echo/evm/transactions
 export const GetTransactionsEchoRequest = z.object({
     // Note: not all these fields are actually strings, but because they are query options, they are effectively strings
+    offset: z.string().optional().default(""),
     limit: z.string().optional().default(""),
     block_time: z.string().optional().default(""),
     chain_ids: z.string().optional().default(""),
